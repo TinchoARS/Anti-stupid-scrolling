@@ -31,7 +31,7 @@ jobs:
         run: |
           set -euo pipefail
           WORKSPACE=$(ls -d *.xcworkspace | head -n 1)
-          SCHEME=$(xcodebuild -workspace "$WORKSPACE" -list | awk '/Schemes:/{flag=1; next} flag && NF {print $1; exit}')
+          SCHEME=$(basename "$(ls -d *.xcodeproj | grep -v '^Pods\.xcodeproj$' | head -n 1)" .xcodeproj)
           echo "Using workspace=$WORKSPACE scheme=$SCHEME"
           xcodebuild build \
             -workspace "$WORKSPACE" \
