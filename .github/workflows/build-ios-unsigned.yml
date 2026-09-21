@@ -1,0 +1,64 @@
+name: Build unsigned iOS IPA
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ["test-app/**"]
+
+jobs:
+  build:
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: test-app
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - run: npm ci
+
+      - run: npx expo prebuild --platform ios --non-interactive
+
+      - name: pod install
+        working-directory: test-app/ios
+        run: pod install
+
+      - name: Archive (no code signing)
+        working-directory: test-app/ios
+        run: |
+          set -euo pipefail
+          WORKSPACE=$(ls -d *.xcworkspace | head -n 1)
+          SCHEME=$(xcodebuild -workspace "$WORKSPACE" -list | awk '/Schemes:/{flag=1; next} flag && NF {print $1; exit}')
+          echo "Using workspace=$WORKSPACE scheme=$SCHEME"
+          xcodebuild archive \
+            -workspace "$WORKSPACE" \
+            -scheme "$SCHEME" \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -archivePath "$RUNNER_TEMP/app.xcarchive" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            DEVELOPMENT_TEAM="" \
+            ONLY_ACTIVE_ARCH=NO
+
+      - name: Package unsigned IPA
+        run: |
+          set -euo pipefail
+          APP_PATH=$(find "$RUNNER_TEMP/app.xcarchive/Products/Applications" -name "*.app" -maxdepth 1 | head -n 1)
+          mkdir -p "$RUNNER_TEMP/Payload"
+          cp -r "$APP_PATH" "$RUNNER_TEMP/Payload/"
+          cd "$RUNNER_TEMP"
+          zip -r AntiIGTest-unsigned.ipa Payload
+          mkdir -p "${{ github.workspace }}/test-app/build"
+          cp AntiIGTest-unsigned.ipa "${{ github.workspace }}/test-app/build/"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: AntiIGTest-unsigned-ipa
+          path: test-app/build/AntiIGTest-unsigned.ipa
