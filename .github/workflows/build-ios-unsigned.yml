@@ -46,6 +46,41 @@ jobs:
             DEVELOPMENT_TEAM="" \
             ONLY_ACTIVE_ARCH=NO
 
+      - name: Ad-hoc sign with entitlements
+        working-directory: test-app
+        run: |
+          set -euo pipefail
+          APP_PATH=$(find "$RUNNER_TEMP/DerivedData/Build/Products/Release-iphoneos" -maxdepth 1 -name "*.app" | head -n 1)
+          if [ -z "$APP_PATH" ]; then
+            echo "No .app found under Release-iphoneos build products:"
+            find "$RUNNER_TEMP/DerivedData/Build/Products" -maxdepth 2
+            exit 1
+          fi
+          echo "App: $APP_PATH"
+          if [ -d "$APP_PATH/PlugIns" ]; then
+            for ext in "$APP_PATH"/PlugIns/*.appex; do
+              [ -e "$ext" ] || continue
+              NAME=$(basename "$ext" .appex)
+              ENT=$(find ios -name "${NAME}.entitlements" | head -n 1)
+              echo "Signing extension $ext with entitlements: ${ENT:-<none>}"
+              if [ -n "$ENT" ]; then
+                codesign --force --sign - --entitlements "$ENT" "$ext"
+              else
+                codesign --force --sign - "$ext"
+              fi
+            done
+          fi
+          APP_NAME=$(basename "$APP_PATH" .app)
+          APP_ENT=$(find ios -name "${APP_NAME}.entitlements" | head -n 1)
+          echo "Signing app $APP_PATH with entitlements: ${APP_ENT:-<none>}"
+          if [ -n "$APP_ENT" ]; then
+            codesign --force --sign - --entitlements "$APP_ENT" "$APP_PATH"
+          else
+            codesign --force --sign - "$APP_PATH"
+          fi
+          echo "--- Final app entitlements ---"
+          codesign -d --entitlements :- "$APP_PATH" || true
+
       - name: Package unsigned IPA
         run: |
           set -euo pipefail
