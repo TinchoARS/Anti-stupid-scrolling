@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Anti-Reels IG
 // @namespace    https://github.com/TinchoARS/Anti-stupid-scrolling
-// @version      0.2.0
+// @version      0.2.1
 // @description  Oculta Reels en Instagram web y redirige fuera de /reels/
 // @match        https://www.instagram.com/*
 // @match        https://instagram.com/*
@@ -43,6 +43,11 @@ if (typeof window !== 'undefined') {
   // article:has hides reels in the feed; /reels/audio/ is excluded because photos with music link there too
   style.textContent = `a[href$="/reels"], a[href*="/reels/"], a[href*="/reel/"], article:has(a[href*="/reel/"], a[href^="/reels/"]:not([href^="/reels/audio/"])) { display: none !important; }`;
   (document.head || document.documentElement).appendChild(style);
+
+  const nav = document.createElement('style');
+  // The sidebar Reels entry stays hidden even in DMs, where the other CSS is off
+  nav.textContent = 'a[href="/reels/"] { display: none !important; }';
+  (document.head || document.documentElement).appendChild(nav);
 
   // document.referrer covers a full page load coming from a DM
   let prev = document.referrer.includes('/direct/') ? '/direct/' : location.pathname;
