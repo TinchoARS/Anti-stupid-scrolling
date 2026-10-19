@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Anti-Reels IG
 // @namespace    https://github.com/TinchoARS/Anti-stupid-scrolling
-// @version      0.2.1
+// @version      0.3.0
 // @description  Oculta Reels en Instagram web y redirige fuera de /reels/
 // @match        https://www.instagram.com/*
 // @match        https://instagram.com/*
@@ -40,8 +40,14 @@ function dmView(dm, path, to) {
 
 if (typeof window !== 'undefined') {
   const style = document.createElement('style');
-  // article:has hides reels in the feed; /reels/audio/ is excluded because photos with music link there too
-  style.textContent = `a[href$="/reels"], a[href*="/reels/"], a[href*="/reel/"], article:has(a[href*="/reel/"], a[href^="/reels/"]:not([href^="/reels/audio/"])) { display: none !important; }`;
+  // Feed reels collapse to a 40px "Reel oculto" strip instead of display:none: zero-height posts break IG's virtualized feed (posts pile up, black screen while scrolling).
+  // /reels/audio/ is excluded because photos with music link there too.
+  const reel = 'article:has(a[href*="/reel/"], a[href^="/reels/"]:not([href^="/reels/audio/"]))';
+  style.textContent = `a[href$="/reels"], a[href*="/reels/"], a[href*="/reel/"] { display: none !important; }
+    ${reel} { max-height: 40px !important; overflow: hidden !important; position: relative !important; }
+    ${reel} > * { visibility: hidden !important; }
+    ${reel} video { display: none !important; }
+    ${reel}::before { content: 'Reel oculto'; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font: 12px system-ui; opacity: .5; }`;
   (document.head || document.documentElement).appendChild(style);
 
   const nav = document.createElement('style');
