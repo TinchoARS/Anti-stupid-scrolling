@@ -18,7 +18,7 @@ Oculta los Reels de Instagram en el navegador.
 
 ## Qué hace
 
-Oculta los links a Reels (barra, explorar, perfiles) y si entrás a /reels/ te manda al inicio.
+Oculta los links a Reels (barra, explorar, perfiles) y si entrás a /reels/ te manda al inicio. Los reels que te mandan por mensaje sí se pueden ver (solo ese reel; si scrolleás al siguiente, te saca).
 
 ## Probar
 
