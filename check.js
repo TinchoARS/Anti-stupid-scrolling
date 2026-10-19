@@ -1,5 +1,5 @@
 const assert = require('assert');
-const { target, decide, dmView } = require('./anti-reels.user.js');
+const { target, decide, dmView, ytTarget } = require('./anti-reels.user.js');
 
 assert.strictEqual(target('/reels'), '/');
 assert.strictEqual(target('/reels/'), '/');
@@ -25,5 +25,18 @@ assert.strictEqual(dmView(false, '/p/ABC/', null), false);
 assert.strictEqual(dmView(true, '/reel/ABC/', null), true);
 assert.strictEqual(dmView(true, '/reels/DEF/', '/'), false);
 assert.strictEqual(dmView(true, '/someuser/', null), false);
+
+assert.strictEqual(ytTarget('/shorts/UR1qWZxmpYw'), '/watch?v=UR1qWZxmpYw');
+assert.strictEqual(ytTarget('/shorts/UR1qWZxmpYw/'), '/watch?v=UR1qWZxmpYw');
+assert.strictEqual(ytTarget('/shorts'), '/');
+assert.strictEqual(ytTarget('/shorts/'), '/');
+assert.strictEqual(ytTarget('/@3blue1brown/shorts'), '/@3blue1brown/videos');
+assert.strictEqual(ytTarget('/@3blue1brown/shorts/'), '/@3blue1brown/videos');
+assert.strictEqual(ytTarget('/channel/UC123/shorts'), '/channel/UC123/videos');
+assert.strictEqual(ytTarget('/'), null);
+assert.strictEqual(ytTarget('/watch'), null);
+assert.strictEqual(ytTarget('/results'), null);
+assert.strictEqual(ytTarget('/@shortsfan'), null);
+assert.strictEqual(ytTarget('/@x/videos'), null);
 
 console.log('ok');

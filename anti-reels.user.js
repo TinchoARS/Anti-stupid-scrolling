@@ -1,10 +1,12 @@
 // ==UserScript==
 // @name         Anti-Reels IG
 // @namespace    https://github.com/TinchoARS/Anti-stupid-scrolling
-// @version      0.3.0
-// @description  Oculta Reels en Instagram web y redirige fuera de /reels/
+// @version      0.4.0
+// @description  Oculta Reels de Instagram y Shorts de YouTube, y redirige fuera de /reels/ y /shorts/
 // @match        https://www.instagram.com/*
 // @match        https://instagram.com/*
+// @match        https://www.youtube.com/*
+// @match        https://m.youtube.com/*
 // @run-at       document-start
 // @grant        none
 // @updateURL    https://raw.githubusercontent.com/TinchoARS/Anti-stupid-scrolling/main/anti-reels.user.js
@@ -38,7 +40,44 @@ function dmView(dm, path, to) {
   return dm && !to && (path.startsWith('/p/') || target(path) !== null);
 }
 
-if (typeof window !== 'undefined') {
+function ytTarget(path) {
+  const short = /^\/shorts\/([A-Za-z0-9_-]+)\/?$/.exec(path);
+  if (short) return '/watch?v=' + short[1];
+  if (path === '/shorts' || path === '/shorts/') return '/';
+  const user = /^(\/@[^/]+|\/channel\/[^/]+)\/shorts\/?$/.exec(path);
+  if (user) return user[1] + '/videos';
+  return null;
+}
+
+if (typeof window !== 'undefined' && location.hostname.endsWith('youtube.com')) {
+  // YouTube: hide Shorts entry points (desktop and m.youtube.com) and redirect Shorts pages
+  const style = document.createElement('style');
+  style.textContent = `
+    ytd-guide-entry-renderer:has(a[title="Shorts"]),
+    ytd-mini-guide-entry-renderer[aria-label="Shorts"],
+    ytd-rich-section-renderer:has(ytd-rich-shelf-renderer[is-shorts]),
+    ytd-rich-shelf-renderer[is-shorts],
+    ytd-reel-shelf-renderer,
+    grid-shelf-view-model:has(ytm-shorts-lockup-view-model),
+    ytd-rich-item-renderer:has(a[href^="/shorts/"]),
+    ytd-video-renderer:has(a[href^="/shorts/"]),
+    ytm-shorts-lockup-view-model-v2,
+    ytm-shorts-lockup-view-model,
+    yt-tab-shape[tab-title="Shorts"],
+    /* m.youtube.com (iPhone) — not verified live yet */
+    ytm-pivot-bar-item-renderer:has(.pivot-shorts),
+    ytm-reel-shelf-renderer,
+    ytm-rich-section-renderer:has(ytm-shorts-lockup-view-model)
+  { display: none !important; }`;
+  (document.head || document.documentElement).appendChild(style);
+
+  function check() {
+    const to = ytTarget(location.pathname);
+    if (to) location.replace(to);
+  }
+  check();
+  setInterval(check, 500); // YouTube is also a single-page app
+} else if (typeof window !== 'undefined') {
   const style = document.createElement('style');
   // Feed reels collapse to a 40px "Reel oculto" strip instead of display:none: zero-height posts break IG's virtualized feed (posts pile up, black screen while scrolling).
   // /reels/audio/ is excluded because photos with music link there too.
@@ -72,4 +111,4 @@ if (typeof window !== 'undefined') {
   setInterval(check, 500); // ponytail: polling 500ms, swap for history.pushState hook if it costs battery
 }
 
-if (typeof module !== 'undefined') module.exports = { target, decide, dmView };
+if (typeof module !== 'undefined') module.exports = { target, decide, dmView, ytTarget };

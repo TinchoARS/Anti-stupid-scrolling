@@ -1,24 +1,25 @@
 # Anti-IG
 
-Oculta los Reels de Instagram en el navegador.
+Oculta los Reels de Instagram y los Shorts de YouTube en el navegador.
 
 ## PC (Brave)
 
 1. Instalar Violentmonkey desde la Chrome Web Store.
-2. En `brave://extensions` → Violentmonkey → Detalles → activar "Permitir scripts de usuario" (si no aparece, activar "Modo desarrollador" arriba a la derecha).
+2. En `brave://extensions` → Violentmonkey → Detalles → activar "Permitir scripts de usuario" (si no aparece, activar "Modo desarrollador" arriba a la derecha). Si limitaste el acceso de Violentmonkey a sitios específicos, agregá también youtube.com.
 3. Abrir el link raw del script (https://raw.githubusercontent.com/TinchoARS/Anti-stupid-scrolling/main/anti-reels.user.js) y tocar Instalar.
 
 ## iPhone (Safari)
 
 1. Borrar la app de Instagram.
 2. Instalar la app "Userscripts" desde la App Store.
-3. Ajustes → Apps → Safari → Extensiones → Userscripts → activar y permitir en instagram.com.
+3. Ajustes → Apps → Safari → Extensiones → Userscripts → activar y permitir en instagram.com y youtube.com.
 4. En Safari abrir el link raw del script, tocar el ícono de extensiones de la barra de direcciones → Userscripts → Instalar.
 5. Usar Instagram desde Safari.
 
 ## Qué hace
 
 Oculta los links a Reels (barra, explorar, perfiles) y si entrás a /reels/ te manda al inicio. Los reels que te mandan por mensaje sí se pueden ver (solo ese reel; si scrolleás al siguiente, te saca).
+En YouTube oculta los Shorts (barra lateral, inicio, búsquedas, pestaña del canal) y si abrís un Short te lo muestra en el reproductor normal, sin poder deslizar al siguiente.
 
 ## Probar
 
